@@ -1,0 +1,25 @@
+{
+    "name": "kipu-bank",
+    "version": "1.0.0",
+    "description": "A decentralized banking system with deposit and withdrawal functionality",
+    "main": "index.js",
+    "scripts": {
+        "test": "hardhat test",
+        "compile": "hardhat compile",
+        "deploy": "hardhat run scripts/deploy.ts"
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": "^5.0.0"
+    },
+    "devDependencies": {
+        "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+        "@types/chai": "^4.3.6",
+        "@types/mocha": "^10.0.1",
+        "@types/node": "^20.6.3",
+        "chai": "^4.3.8",
+        "ethers": "^6.7.1",
+        "hardhat": "^2.17.3",
+        "ts-node": "^10.9.1",
+        "typescript": "^5.2.2"
+    }
+}
