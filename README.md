@@ -1,4 +1,4 @@
-# KipuBank - OpenZeppelin
+# KipuBank
 
 ---
 ### 🔹 Casos de uso
