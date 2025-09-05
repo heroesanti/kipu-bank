@@ -11,10 +11,42 @@
 						"internalType": "address",
 						"name": "_tokenAddress",
 						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_bankCap",
+						"type": "uint256"
 					}
 				],
 				"stateMutability": "nonpayable",
 				"type": "constructor"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "bankCap",
+						"type": "uint256"
+					}
+				],
+				"name": "BankCapInitError",
+				"type": "error"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "user",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "balance",
+						"type": "uint256"
+					}
+				],
+				"name": "NoBalanceError",
+				"type": "error"
 			},
 			{
 				"inputs": [
@@ -44,6 +76,17 @@
 				"type": "error"
 			},
 			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "tokenAddress",
+						"type": "address"
+					}
+				],
+				"name": "TokenInitError",
+				"type": "error"
+			},
+			{
 				"anonymous": false,
 				"inputs": [
 					{
@@ -60,6 +103,19 @@
 				"anonymous": false,
 				"inputs": [
 					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "cap",
+						"type": "uint256"
+					}
+				],
+				"name": "BankCapSet",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
 						"indexed": true,
 						"internalType": "address",
 						"name": "owner",
@@ -69,6 +125,18 @@
 						"indexed": false,
 						"internalType": "uint256",
 						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "userDepositCount",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "totalDepositsCount",
 						"type": "uint256"
 					}
 				],
@@ -166,6 +234,18 @@
 						"internalType": "uint256",
 						"name": "fee",
 						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "userWithdrawalCount",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "totalWithdrawalsCount",
+						"type": "uint256"
 					}
 				],
 				"name": "Withdrawn",
@@ -195,6 +275,29 @@
 						"internalType": "bool",
 						"name": "exists",
 						"type": "bool"
+					},
+					{
+						"internalType": "uint256",
+						"name": "depositCount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "withdrawalCount",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "bankCap",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
 					}
 				],
 				"stateMutability": "view",
@@ -217,7 +320,7 @@
 				],
 				"name": "deposit",
 				"outputs": [],
-				"stateMutability": "nonpayable",
+				"stateMutability": "payable",
 				"type": "function"
 			},
 			{
@@ -229,6 +332,70 @@
 					}
 				],
 				"name": "getAccountBalance",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getTotalDepositsCount",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getTotalWithdrawalsCount",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "user",
+						"type": "address"
+					}
+				],
+				"name": "getUserDepositCount",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "user",
+						"type": "address"
+					}
+				],
+				"name": "getUserWithdrawalCount",
 				"outputs": [
 					{
 						"internalType": "uint256",
@@ -345,6 +512,45 @@
 						"internalType": "contract IERC20",
 						"name": "",
 						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "totalDeposits",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "totalDepositsCount",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "totalWithdrawalsCount",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
 					}
 				],
 				"stateMutability": "view",
@@ -484,11 +690,11 @@
 			]
 		},
 		"contracts/KipuBank.sol": {
-			"keccak256": "0x9ee56925016f1c8a343675853abc07c2e3dd6ff6bb5099342747ce64b375b0fd",
+			"keccak256": "0x3d51a0b7c84c146a63adca7ad1485af31082920ef610e0db9032d3ecac7d8754",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://5e0b7ab908f27b215c2e6722364e1820656048d02fdd5c1bf9645a40158f0aa2",
-				"dweb:/ipfs/QmTJCNbhfnQ9hhyTUVdKWa5VcSWryXmr6RtMhND7LgHJEJ"
+				"bzz-raw://941ab2800dba5570c561314e5f09184ec8df477ce56a53504898932e03d97b02",
+				"dweb:/ipfs/QmRng6c6efuvTHbDETNGiZoMxiUqobtGuV4KDzdTF1iNjd"
 			]
 		}
 	},

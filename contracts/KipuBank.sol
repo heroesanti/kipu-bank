@@ -1,12 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-
-contract KipuBank is Ownable, ReentrancyGuard {
-    IERC20 public token;
+contract KipuBank {
     uint256 public immutable bankCap; // <-- Límite global de depósitos (inmutable)
     uint256 public totalDeposits;     // <-- Balance total del contrato (para validar bankCap)
 
@@ -37,10 +32,16 @@ contract KipuBank is Ownable, ReentrancyGuard {
     event TokenAddressUpdated(address newTokenAddress);
     event BankCapSet(uint256 cap);
 
-    constructor(address _tokenAddress, uint256 _bankCap) Ownable(msg.sender) {
-        require(_tokenAddress != address(0), "Token address cannot be zero");
-        require(_bankCap > 0, "Bank cap must be greater than 0");
-        token = IERC20(_tokenAddress);
+    error BankCapInitError(uint256 bankCap);
+    error NoBalanceError(address user, uint256 balance);
+
+    modifier withBalance() {
+        if (accounts[msg.sender].balance <= 0) revert NoBalanceError(msg.sender, 0); 
+        _;
+    }
+
+    constructor(uint256 _bankCap) {
+        if (_bankCap < 0) revert BankCapInitError(_bankCap);
         bankCap = _bankCap;
         emit BankCapSet(_bankCap);
     }
@@ -52,14 +53,14 @@ contract KipuBank is Ownable, ReentrancyGuard {
             balance: 0,
             lastDepositTimestamp: 0,
             exists: true,
-            depositCount: 0,       // Inicializar contador de depósitos
-            withdrawalCount: 0     // Inicializar contador de retiros
+            depositCount: 0,  
+            withdrawalCount: 0   
         });
 
         emit AccountCreated(msg.sender);
     }
 
-    function deposit(uint256 amount) external nonReentrant {
+    function deposit(uint256 amount) external payable {
         require(accounts[msg.sender].exists, "Account does not exist");
         require(amount >= minimumDeposit, "Amount below minimum deposit");
         require(
@@ -67,19 +68,23 @@ contract KipuBank is Ownable, ReentrancyGuard {
             "Deposit would exceed bank capacity"
         );
 
-        bool success = token.transferFrom(msg.sender, address(this), amount);
-        require(success, "Token transfer failed");
-
         accounts[msg.sender].balance += amount;
         accounts[msg.sender].lastDepositTimestamp = block.timestamp;
         accounts[msg.sender].depositCount += 1;
         totalDeposits += amount;
-        totalDepositsCount += 1;
+        _incrementTotalDepositsCount();
 
         emit Deposited(msg.sender, amount, accounts[msg.sender].depositCount, totalDepositsCount);
     }
 
-    function withdraw(uint256 amount) external nonReentrant {
+    /**
+     * @dev Increments the total deposits counter by 1
+     */
+    function _incrementTotalDepositsCount() private {
+        totalDepositsCount += 1;
+    }
+
+    function withdraw(uint256 amount) external withBalance {
         Account storage account = accounts[msg.sender];
         require(account.exists, "Account does not exist");
         require(account.balance >= amount, "Insufficient balance");
@@ -95,12 +100,19 @@ contract KipuBank is Ownable, ReentrancyGuard {
         account.balance -= amount;
         account.withdrawalCount += 1;
         totalDeposits -= amount;
-        totalWithdrawalsCount += 1;
+        _incrementTotalWithdrawlsCount();
 
-        bool success = token.transfer(msg.sender, amountAfterFee);
+        (bool success, ) = msg.sender.call{value: amountAfterFee}("");
         require(success, "Token transfer failed");
 
         emit Withdrawn(msg.sender, amount, feeAmount, account.withdrawalCount, totalWithdrawalsCount);
+    }
+
+    /**
+     * @dev Increments the total deposits counter by 1
+     */
+    function _incrementTotalWithdrawlsCount() private {
+        totalWithdrawalsCount += 1;
     }
 
     function getUserDepositCount(address user) external view returns (uint256) {
@@ -130,30 +142,29 @@ contract KipuBank is Ownable, ReentrancyGuard {
         return accounts[accountOwner].balance;
     }
 
-    function setMinimumDeposit(uint256 _minimumDeposit) external onlyOwner {
+    function setMinimumDeposit(uint256 _minimumDeposit) external {
         minimumDeposit = _minimumDeposit;
         emit MinimumDepositUpdated(_minimumDeposit);
     }
 
-    function setWithdrawalFee(uint256 _withdrawalFee) external onlyOwner {
+    function setWithdrawalFee(uint256 _withdrawalFee) external {
         require(_withdrawalFee <= 10, "Fee cannot exceed 10%");
         withdrawalFee = _withdrawalFee;
         emit WithdrawalFeeUpdated(_withdrawalFee);
     }
 
-    function setLockPeriod(uint256 _lockPeriod) external onlyOwner {
+    function setLockPeriod(uint256 _lockPeriod) external {
         lockPeriod = _lockPeriod;
         emit LockPeriodUpdated(_lockPeriod);
     }
 
-    function setTokenAddress(address _tokenAddress) external onlyOwner {
+    function setTokenAddress(address _tokenAddress) external {
         require(_tokenAddress != address(0), "Token address cannot be zero");
-        token = IERC20(_tokenAddress);
         emit TokenAddressUpdated(_tokenAddress);
     }
 
-    function withdrawFees() external onlyOwner {
-        uint256 contractBalance = token.balanceOf(address(this));
+    function withdrawFees() external {
+        uint256 contractBalance = msg.sender.balance;
         uint256 totalUserBalances = 0;
 
         // This is a simplified approach and might be gas-intensive with many users
@@ -166,7 +177,7 @@ contract KipuBank is Ownable, ReentrancyGuard {
         uint256 fees = contractBalance - totalUserBalances;
         require(fees > 0, "No fees to withdraw");
 
-        bool success = token.transfer(owner(), fees);
+        (bool success, ) = msg.sender.call{value: fees}("");
         require(success, "Token transfer failed");
     }
 }

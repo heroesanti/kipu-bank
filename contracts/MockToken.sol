@@ -11,9 +11,6 @@ contract MockToken is ERC20, Ownable, ERC20Burnable, ERC20Permit {
     constructor(address initialOwner) ERC20("Mock Token", "MTK") Ownable(initialOwner) ERC20Permit("Mock Token") {
         _mint(msg.sender, 1000000 * 10**decimals());
     }
-    //ERC20("PegoToken", "PET")
-        // Ownable(initialOwner)
-        // ERC20Permit("PegoToken")
 
     function mint(address to, uint256 amount) external onlyOwner {
         _mint(to, amount);
