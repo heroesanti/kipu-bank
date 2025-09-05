@@ -37,22 +37,20 @@
 ### Pasos para desplegar
 #### Opción 1: Usando Remix IDE
 1. **Abrir Remix** y clonar el proyecto
+
 2. **Compilar:**
     - Seleccionar el compilador Solidity 0.8.30+.
     - Hacer clic en "Compile".
+
 3. **Desplegar KipuBank.sol:**
     - Ir a la pestaña "Deploy & Run".
     - Seleccionar el entorno (ej: Injected Web3 para MetaMask o JavaScript VM para pruebas locales).
-    - Hacer clic en "Deploy".
-3. **Desplegar MockToken.sol:**
-    - Ir a la pestaña "Deploy & Run".
-    - Seleccionar el entorno (ej: Injected Web3 para MetaMask o JavaScript VM para pruebas locales).
-    - Ingresar address
-    - Hacer clic en "Deploy".
-    - Copiar address del token
-4. **Desplegar KipuBank.sol:**
-    - Ir a la pestaña "Deploy & Run".
-    - Seleccionar el entorno (ej: Injected Web3 para MetaMask o JavaScript VM para pruebas locales).
-    - Ingresar address del token
     - Ingresar bankCap
     - Hacer clic en "Deploy".
+    - Copiar address del contrato
+    
+4. **Publicar en testnet**
+    - Ingresar a https://sepolia.etherscan.io/
+    - Buscar address del contrato
+    - En Contracts, completar Verify & Publish
+
